@@ -30,6 +30,9 @@ class DataProvider(object):
 
         print("in init")
 
+        self.shifter = 10
+        self.ratio = 1
+
         self.getdata()
 
         self.df_corona = pd.read_csv('corona_report/data/agg_data.csv',
@@ -37,33 +40,51 @@ class DataProvider(object):
             parse_dates=["datetime"],
             index_col="datetime"
         )
-
         self.df_corona = self.df_corona.sort_index()
+
+        self.data_population=pd.read_csv('corona_report/data/POP_TOTAL_DS2_en_v2.csv',
+                            usecols=['Country Name', 'Country Code',u'2015'])        
 
         # Preparing containers
         self.type_stats_ds = ColumnDataSource(data={"dates": [], "country1": [], "country2": []})
 
 
         self.update_stats()
-        
+
+    def set_shifter(self,shift_val):
+        print("in set_shifter:",shift_val)
+        self.shifter = np.clip(shift_val, 0, 20)
+    
         
     def update_stats(self):
         print("in update_stats")
+
+        italy_size = self.data_population[self.data_population['Country Name']=='Italy']['2015'].values[0]
+        usa_size = self.data_population[self.data_population['Country Name']=='United States']['2015'].values[0]      
+        self.ratio = usa_size/italy_size
+
+        italy = self.df_corona.copy().rename({'confirmed':'confirmed_2'}, axis=1)
+        italy.index = italy.index + pd.Timedelta(days=self.shifter)
+        italy.confirmed_2= italy.confirmed_2.astype(float)
+        italy.confirmed_2 *= self.ratio
+        italy.confirmed_2= italy.confirmed_2.astype(int)
+        italy = italy[italy.country=='Italy']
+        italy = italy.confirmed_2[italy.country=='Italy']
+        italy = italy.resample('D').sum().rolling("3D").mean()
+
 
         usa = self.df_corona.copy().rename({'confirmed':'confirmed_1'}, axis=1)
         usa = usa[usa.country=='US']
         usa = usa.confirmed_1.resample('D').sum().rolling("3D").mean()
 
-        italy = self.df_corona.copy().rename({'confirmed':'confirmed_2'}, axis=1)
-        italy.index = italy.index + pd.Timedelta(days=13)
-        italy = italy.confirmed_2[italy.country=='Italy']
-        italy = italy.resample('D').sum().rolling("3D").mean()
 
         tmp = pd.concat([usa, italy],axis=1)
         tmp = tmp.reset_index()
 
         self.type_stats_ds.data = tmp
 
+    def get_ratio(self):
+        return self.ratio
 
     def getdata(self):
 

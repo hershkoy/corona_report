@@ -29,24 +29,32 @@ data_provider = DataProvider()
 p=stats_plot = figure(x_axis_type='datetime',plot_height=400, plot_width=400,
                     tools=["save"],
                     name="stats_plot",
-                    title="USA vs Italy (shifted 13 days)")
+                    title="USA vs Italy (shifted)")
 stats_plot.line(x="datetime", y="confirmed_1", width=0.9, source=data_provider.type_stats_ds, legend_label="USA")
 stats_plot.line(x="datetime", y="confirmed_2", width=0.9, source=data_provider.type_stats_ds,color="red", legend_label="Italy")
 stats_plot.legend.location = "top_left"
 p.yaxis.formatter=NumeralTickFormatter(format="00")
 
-#stats_plot.vbar(x="dates", top="country2", width=0.9, source=data_provider.type_stats_ds)
-#stats_plot.xaxis[0].ticker=FixedTicker(
- #       ticks=[data_provider.Severitymap[sevirty] for sevirty in data_provider.type_stats_ds['Accident_Severity']])
+
+
+shifter_slider =  Slider(start=-1, end=20,
+                value=10, 
+                step=1,name="shifter_slider", title="Shift by")
 
 
 
-
+def update_shifter(attr, old, new):
+    if new != old:
+        data_provider.set_shifter(new)
+        data_provider.update_stats()
 
 def update_data():
     data_provider.getdata()
 
 
 
+shifter_slider.on_change("value_throttled", update_shifter)
+
 curdoc().add_root(stats_plot)
+curdoc().add_root(shifter_slider)
 curdoc().add_periodic_callback(update_data, cfg.UPDATE_INTERVAL)
