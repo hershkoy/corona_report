@@ -24,7 +24,7 @@ class DataProvider(object):
 
     def __init__(self):
         
-        self.df_corona = pd.read_csv('data/agg_data_2020-03-19.csv',
+        self.df_corona = pd.read_csv('data/agg_data.csv',
             usecols=DataProvider.RAW_COLS,
             parse_dates=["datetime"],
             index_col="datetime"
