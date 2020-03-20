@@ -32,6 +32,7 @@ class DataProvider(object):
 
         self.shifter = 10
         self.ratio = 1
+        self.sizedCorrection=1
 
         self.getdata()
 
@@ -65,9 +66,10 @@ class DataProvider(object):
 
         italy = self.df_corona.copy().rename({'confirmed':'confirmed_2'}, axis=1)
         italy.index = italy.index + pd.Timedelta(days=self.shifter)
-        italy.confirmed_2= italy.confirmed_2.astype(float)
-        italy.confirmed_2 *= self.ratio
-        italy.confirmed_2= italy.confirmed_2.astype(int)
+        if self.sizedCorrection==1:
+            italy.confirmed_2= italy.confirmed_2.astype(float)
+            italy.confirmed_2 *= self.ratio
+            italy.confirmed_2= italy.confirmed_2.astype(int)
         italy = italy[italy.country=='Italy']
         italy = italy.confirmed_2[italy.country=='Italy']
         italy = italy.resample('D').sum().rolling("3D").mean()
@@ -85,6 +87,9 @@ class DataProvider(object):
 
     def get_ratio(self):
         return self.ratio
+
+    def set_sizedCorrection(self,val):
+        self.sizedCorrection=val
 
     def getdata(self):
 

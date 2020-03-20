@@ -45,9 +45,8 @@
                 <h1>Corona Track</h1>
             </div>
             <div class="col-9">
-                <p>
-                    Data from John Hopkins Database.
-                </p>
+                <p>Data from <a href="https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6" target='_blank'>John Hopkins Database.</a></p>
+                <p>App Code on <a href='https://github.com/hershkoy/corona_report' target='_blank'>Github</a></p>
             </div>
         </div>
         <div class="row">
@@ -56,6 +55,9 @@
             </div>
             <div class="col-12">
                 {{ embed(roots.update_shifter) }}
+                Country Size Difference is: {{ embed(cur_ratio) }}
+                {{ embed(roots.sizedCorrection_chkbox) }}
+
             </div>            
         </div>
     </div>
