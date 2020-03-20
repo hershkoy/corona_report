@@ -25,4 +25,4 @@ NUMERIC_COLS = ['Confirmed',
                 'Deaths', 
                 'Recovered']
 
-UPDATE_INTERVAL = 1000
+UPDATE_INTERVAL = 40000

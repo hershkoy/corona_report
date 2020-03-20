@@ -4,9 +4,10 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+import calendar
+import time
 from string import capwords
 from difflib import get_close_matches
-from datetime import datetime, date, time 
 from bokeh.models import ColumnDataSource
 
 import github
@@ -27,8 +28,9 @@ class DataProvider(object):
 
     def __init__(self):
 
-        if (True):
-            self.getdata()
+        print("in init")
+
+        self.getdata()
 
         self.df_corona = pd.read_csv('corona_report/data/agg_data.csv',
             usecols=DataProvider.RAW_COLS,
@@ -65,25 +67,28 @@ class DataProvider(object):
 
     def getdata(self):
 
+            save_dir = os.path.join(os.getcwd(), "corona_report/data")
+            print('save_dir:', save_dir)
+            if not os.path.exists(save_dir):
+                os.system('mkdir -p '+save_dir)
+
+            csv_file_name = 'agg_data.csv'
+            print('...', csv_file_name)
+
+            if os.path.exists(os.path.join(save_dir, csv_file_name)):
+                current_time_epoch = calendar.timegm(time.gmtime())
+                last_update = os.path.getmtime(os.path.join(save_dir, csv_file_name))
+                print("t:",current_time_epoch,last_update)
+                diff = current_time_epoch-last_update
+                print("diff:",diff)
+                if (diff<20000):
+                    return
+
+
             df = github.get()
             print("back from github",df.info())
             # sheets need to be sorted by date value
             print('Sorting by datetime...')
-            current_date = str(datetime.date(datetime.now()))
-
-            # if df.date.max() == current_date:
-            #     df = df[df.date != df.date.max()]
-            # else:
-            #     df = df[df.date != current_date]
-
             df = df.sort_values('datetime')
-
-            save_dir = os.path.join(os.getcwd(), "corona_report/data")
-            print('save_dir:', save_dir)
-
-            if not os.path.exists(save_dir):
-                os.system('mkdir -p '+save_dir)
-
-            csv_file_name = 'agg_data.csv'.format(datetime.date(datetime.now()))
             df.astype(str).to_csv(os.path.join(save_dir, csv_file_name))
-            print('...', csv_file_name)
+

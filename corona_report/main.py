@@ -42,14 +42,11 @@ p.yaxis.formatter=NumeralTickFormatter(format="00")
 
 
 
-def update_stats():
-    stats_plot.x_range.factors = data_provider.dispatch_types
 
-
-def update():
-    data_provider.fetch_data()
-    update_stats()
+def update_data():
+    data_provider.getdata()
 
 
 
 curdoc().add_root(stats_plot)
+curdoc().add_periodic_callback(update_data, cfg.UPDATE_INTERVAL)
