@@ -1,16 +1,20 @@
 """Data provider for Corona Report application."""
 
+import os
+import sys
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-import datetime as dt
-import pytz
-from bokeh.models import ColumnDataSource, CDSView, BooleanFilter
+from string import capwords
+from difflib import get_close_matches
+from datetime import datetime, date, time 
+from bokeh.models import ColumnDataSource
 
-import config as cfg
+import github
+from config import REPO, TMP_FOLDER, TMP_GIT, DATA
 
 
 class DataProvider(object):
+
     RAW_COLS = [ 'confirmed', 'country', 'deaths', 'province', 'recovered',
        'date', 'file_date','datetime']
     COLS = [ 'confirmed', 'country', 'deaths', 'province', 'recovered',
@@ -19,11 +23,13 @@ class DataProvider(object):
     #add a colormap to signal te severity of the accident
     colormap={"1":"darkred",
                "2":"saddlebrown",
-               "3":"orange"}
-    
+               "3":"orange"}  
 
     def __init__(self):
-        
+
+        if (True):
+            self.getdata()
+
         self.df_corona = pd.read_csv('corona_report/data/agg_data.csv',
             usecols=DataProvider.RAW_COLS,
             parse_dates=["datetime"],
@@ -44,12 +50,12 @@ class DataProvider(object):
 
         usa = self.df_corona.copy().rename({'confirmed':'confirmed_1'}, axis=1)
         usa = usa[usa.country=='US']
-        usa = usa.confirmed_1.resample('D').sum().rolling("3D").sum()
+        usa = usa.confirmed_1.resample('D').sum().rolling("3D").mean()
 
         italy = self.df_corona.copy().rename({'confirmed':'confirmed_2'}, axis=1)
         italy.index = italy.index + pd.Timedelta(days=13)
         italy = italy.confirmed_2[italy.country=='Italy']
-        italy = italy.resample('D').sum().rolling("3D").sum()
+        italy = italy.resample('D').sum().rolling("3D").mean()
 
         tmp = pd.concat([usa, italy],axis=1)
         tmp = tmp.reset_index()
@@ -57,3 +63,27 @@ class DataProvider(object):
         self.type_stats_ds.data = tmp
 
 
+    def getdata(self):
+
+            df = github.get()
+            print("back from github",df.info())
+            # sheets need to be sorted by date value
+            print('Sorting by datetime...')
+            current_date = str(datetime.date(datetime.now()))
+
+            # if df.date.max() == current_date:
+            #     df = df[df.date != df.date.max()]
+            # else:
+            #     df = df[df.date != current_date]
+
+            df = df.sort_values('datetime')
+
+            save_dir = os.path.join(os.getcwd(), "corona_report/data")
+            print('save_dir:', save_dir)
+
+            if not os.path.exists(save_dir):
+                os.system('mkdir -p '+save_dir)
+
+            csv_file_name = 'agg_data.csv'.format(datetime.date(datetime.now()))
+            df.astype(str).to_csv(os.path.join(save_dir, csv_file_name))
+            print('...', csv_file_name)
