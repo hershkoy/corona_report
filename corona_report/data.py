@@ -58,7 +58,7 @@ class DataProvider(object):
     
         
     def update_stats(self):
-        print("in update_stats")
+        #print("in update_stats")
 
         italy_size = self.data_population[self.data_population['Country Name']=='Italy']['2015'].values[0]
         usa_size = self.data_population[self.data_population['Country Name']=='United States']['2015'].values[0]      
