@@ -20,10 +20,6 @@ class DataProvider(object):
     COLS = [ 'confirmed', 'country', 'deaths', 'province', 'recovered',
        'date', 'file_date','datetime']
     
-    #add a colormap to signal te severity of the accident
-    colormap={"1":"darkred",
-               "2":"saddlebrown",
-               "3":"orange"}  
 
     def __init__(self):
 
@@ -33,6 +29,7 @@ class DataProvider(object):
         self.ratio = 1
         self.sizedCorrection=1
         self.country_sizes = []
+        self.countries_select = ["Italy","US"]
 
         self.getdata()
 
@@ -49,22 +46,20 @@ class DataProvider(object):
         # Preparing containers
         self.type_stats_ds = ColumnDataSource(data={"dates": [], "country1": [], "country2": []})
 
+        self.countries = self.df_corona.country.sort_values().unique()
+
 
         self.update_stats()
 
-    def set_shifter(self,shift_val):
-        print("in set_shifter:",shift_val)
-        self.shifter = np.clip(shift_val, 0, 20)
-    
-        
+
     def update_stats(self):
-        #print("in update_stats")
+        print("in update_stats",self.countries_select)
 
-        italy_size = self.data_population[self.data_population['Country Name']=='Italy']['2015'].values[0]
-        usa_size = self.data_population[self.data_population['Country Name']=='United States']['2015'].values[0]      
-        self.ratio = usa_size/italy_size
+        country0_size = self.data_population[self.data_population['Country Name']==self.countries_select[0]]['2015'].values[0]
+        country1_size = self.data_population[self.data_population['Country Name']==self.countries_select[1]]['2015'].values[0]      
+        self.ratio = country1_size/country0_size
 
-        self.country_sizes = [italy_size,usa_size]
+        self.country_sizes = [country0_size,country1_size]
 
         italy = self.df_corona.copy().rename({'confirmed':'confirmed_2'}, axis=1)
         italy.index = italy.index + pd.Timedelta(days=self.shifter)
@@ -72,13 +67,13 @@ class DataProvider(object):
             italy.confirmed_2= italy.confirmed_2.astype(float)
             italy.confirmed_2 *= self.ratio
             italy.confirmed_2= italy.confirmed_2.astype(int)
-        italy = italy[italy.country=='Italy']
-        italy = italy.confirmed_2[italy.country=='Italy']
+        italy = italy[italy.country==self.countries_select[0]]
+        italy = italy.confirmed_2[italy.country==self.countries_select[0]]
         italy = italy.resample('D').sum().rolling("3D").mean()
 
 
         usa = self.df_corona.copy().rename({'confirmed':'confirmed_1'}, axis=1)
-        usa = usa[usa.country=='US']
+        usa = usa[usa.country==self.countries_select[1]]
         usa = usa.confirmed_1.resample('D').sum().rolling("3D").mean()
 
 
@@ -89,12 +84,24 @@ class DataProvider(object):
 
     def get_ratio(self):
         return self.ratio
+    
+    def get_countries(self):
+        return self.countries.tolist()
 
     def get_country_sizes(self):
         return self.country_sizes
 
     def set_sizedCorrection(self,val):
         self.sizedCorrection=val
+
+    def set_shifter(self,shift_val):
+        #print("in set_shifter:",shift_val)
+        self.shifter = np.clip(shift_val, 0, 20)
+    
+    def set_country(self,ind,val):
+        #print("in set_shifter:",shift_val)
+        self.countries_select[ind] = val
+
 
     def getdata(self):
 
@@ -116,10 +123,12 @@ class DataProvider(object):
                     return
 
 
+            print('Updating data...')
             df = github.get()
-            print("back from github",df.info())
+            print("back from github.saving")
+            #print("back from github",df.info())
             # sheets need to be sorted by date value
-            print('Sorting by datetime...')
+            #print('Sorting by datetime...')
             df = df.sort_values('datetime')
             df.astype(str).to_csv(os.path.join(save_dir, csv_file_name))
 

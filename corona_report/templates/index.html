@@ -53,10 +53,13 @@
             <div class="col-12">
                 {{ embed(roots.stats_plot) }}
             </div>
-            <div class="col-3">
+            <div class="col-6">
+                Compare: {{ embed(roots.country_select1) }} To  {{ embed(roots.country_select2) }}
+            </div>            
+            <div class="col-4">
                 {{ embed(roots.shifter_slider) }}
                 <p>population ratio is: {{ cur_ratio }} </p>
-                <p>(Italy: {{ country1 }}M, USA: {{ country2 }}M</p>
+                <p>(Italy: {{ country1 }}M, USA: {{ country2 }}M)</p>
                 <p>{{ embed(roots.sizedCorrection_chkbox) }} </p>
             </div>            
         </div>
