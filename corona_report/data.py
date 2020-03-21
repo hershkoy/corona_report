@@ -46,7 +46,7 @@ class DataProvider(object):
         # Preparing containers
         self.type_stats_ds = ColumnDataSource(data={"dates": [], "country1": [], "country2": []})
 
-        self.countries = self.df_corona.country.sort_values().unique()
+        self.countries_options = self.df_corona.country.sort_values().unique()
 
 
         self.update_stats()
@@ -85,11 +85,12 @@ class DataProvider(object):
     def get_ratio(self):
         return self.ratio
     
-    def get_countries(self):
-        return self.countries.tolist()
+    def get_countries_info(self):
+        return [{'name':self.countries_select[0],'size':self.country_sizes[0]},
+               {'name':self.countries_select[1],'size':self.country_sizes[1]}]
 
-    def get_country_sizes(self):
-        return self.country_sizes
+    def get_countries_options(self):
+        return self.countries_options.tolist()
 
     def set_sizedCorrection(self,val):
         self.sizedCorrection=val
@@ -99,7 +100,7 @@ class DataProvider(object):
         self.shifter = np.clip(shift_val, 0, 20)
     
     def set_country(self,ind,val):
-        #print("in set_shifter:",shift_val)
+        print("in set_country:",ind,val)
         self.countries_select[ind] = val
 
 

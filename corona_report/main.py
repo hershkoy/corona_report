@@ -6,7 +6,7 @@ import datetime as dt
 from bokeh.plotting import figure, curdoc
 from bokeh.models import HoverTool, CustomJSHover,TickFormatter
 from bokeh.tile_providers import get_provider, Vendors
-from bokeh.models.widgets import DataTable, TableColumn, HTMLTemplateFormatter, DateFormatter, Slider,DateSlider, DateRangeSlider, RangeSlider,CheckboxGroup,Button,Select
+from bokeh.models.widgets import DataTable, TableColumn, HTMLTemplateFormatter, DateFormatter, Slider,DateSlider, DateRangeSlider, RangeSlider,CheckboxGroup,Button,Select,Div
 from bokeh.models.callbacks import CustomJS
 from bokeh.models.tickers import FixedTicker
 from bokeh.models import NumeralTickFormatter
@@ -31,7 +31,8 @@ cur_ratio = 0 #global
 
 data_provider = DataProvider()
 
-countries = data_provider.get_countries()
+countries = data_provider.get_countries_info()
+countries_options = data_provider.get_countries_options()
 
 p=stats_plot = figure(x_axis_type='datetime',plot_height=400, plot_width=400,
                     tools=["save","crosshair"],  #todo: add hover
@@ -52,8 +53,11 @@ sizedCorrection_chkbox = CheckboxGroup(
     active=[],
     name="sizedCorrection_chkbox")
 
-country_select1 = Select(title="Country:", name="country_select1",value="US", options=countries)
-country_select2 = Select(title="Country:", name="country_select2",value="Italy", options=countries)
+country_select0 = Select(title="Country:", name="country_select0",value="Italy", options=countries_options)
+country_select1 = Select(title="Country:", name="country_select1",value="US", options=countries_options)
+
+countries_info_div = Div(text="""0""",name='countries_info_div' )
+
 
 
 
@@ -70,50 +74,51 @@ def sizeCorrection_click(attr, old, new):
     data_provider.set_sizedCorrection(val)
     data_provider.update_stats()
 
-def country_select1_change(attr, old, new):
-    global cur_ratio
-    print("in country_select1_change:", old, new)
+def country_select0_change(attr, old, new):
+    global cur_ratio,countries
+    print("in country_select0_change:", old, new)
     if new == old:
         return
     data_provider.set_country(0,new)
     data_provider.update_stats()
     cur_ratio = data_provider.get_ratio()
     print("ratio:", cur_ratio)
-    curdoc().template_variables["cur_ratio"] = round(cur_ratio,1)
+    update_countries_info_markup(countries,cur_ratio)
 
-def country_select2_change(attr, old, new):
-    global cur_ratio
-    print("in country_select1_change:", old, new)
+def country_select1_change(attr, old, new):
+    global cur_ratio,countries
+    print("in country_select0_change:", old, new)
     if new == old:
         return
     data_provider.set_country(1,new)
     data_provider.update_stats()
     cur_ratio = data_provider.get_ratio()
     print("ratio:", cur_ratio)
-    curdoc().template_variables["cur_ratio"] = round(cur_ratio,1)
+    update_countries_info_markup(countries,cur_ratio)
 
+def update_countries_info_markup(countries,cur_ratio):
+    countries = data_provider.get_countries_info()
+    print(countries)
+    countries_info_div.text ="<p>population ratio is:"+str(round(cur_ratio,1))+"</p>"+"<p>("+countries[0]['name']+":"+str(round(countries[0]['size']/1e6,1))+"M, "+countries[1]['name']+":"+str(round(countries[1]['size']/1e6,1))+"M)</p>"
 
 def update_data():
     data_provider.getdata()
 
+
 cur_ratio = data_provider.get_ratio()
-country1,country2 = data_provider.get_country_sizes()
+update_countries_info_markup(countries,cur_ratio)
 
 
 shifter_slider.on_change("value_throttled", update_shifter)
 sizedCorrection_chkbox.on_change('active',sizeCorrection_click)
+country_select0.on_change('value',country_select0_change)
 country_select1.on_change('value',country_select1_change)
-country_select2.on_change('value',country_select2_change)
-
 
 curdoc().add_root(sizedCorrection_chkbox)
 curdoc().add_root(stats_plot)
 curdoc().add_root(shifter_slider)
+curdoc().add_root(country_select0)
 curdoc().add_root(country_select1)
-curdoc().add_root(country_select2)
-
-curdoc().template_variables["cur_ratio"] = round(cur_ratio,1)
-curdoc().template_variables["country1"] = round(country1/1e6,1)
-curdoc().template_variables["country2"] = round(country2/1e6,1)
+curdoc().add_root(countries_info_div)
 
 curdoc().add_periodic_callback(update_data, cfg.UPDATE_INTERVAL)
