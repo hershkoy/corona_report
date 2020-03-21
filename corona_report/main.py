@@ -64,7 +64,8 @@ def update_data():
     data_provider.getdata()
 
 cur_ratio = data_provider.get_ratio()
-print("cur_ratio:",cur_ratio)
+country1,country2 = data_provider.get_country_sizes()
+
 
 shifter_slider.on_change("value_throttled", update_shifter)
 sizedCorrection_chkbox.on_change('active',sizedCorrection_click)
@@ -73,4 +74,9 @@ sizedCorrection_chkbox.on_change('active',sizedCorrection_click)
 curdoc().add_root(stats_plot)
 curdoc().add_root(shifter_slider)
 #curdoc().add_root(sizedCorrection_chkbox)
+
+curdoc().template_variables["cur_ratio"] = round(cur_ratio,1)
+curdoc().template_variables["country1"] = round(country1/1e6,1)
+curdoc().template_variables["country2"] = round(country2/1e6,1)
+
 curdoc().add_periodic_callback(update_data, cfg.UPDATE_INTERVAL)

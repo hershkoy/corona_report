@@ -32,6 +32,7 @@ class DataProvider(object):
         self.shifter = 10
         self.ratio = 1
         self.sizedCorrection=1
+        self.country_sizes = []
 
         self.getdata()
 
@@ -63,6 +64,8 @@ class DataProvider(object):
         usa_size = self.data_population[self.data_population['Country Name']=='United States']['2015'].values[0]      
         self.ratio = usa_size/italy_size
 
+        self.country_sizes = [italy_size,usa_size]
+
         italy = self.df_corona.copy().rename({'confirmed':'confirmed_2'}, axis=1)
         italy.index = italy.index + pd.Timedelta(days=self.shifter)
         if self.sizedCorrection==1:
@@ -86,6 +89,9 @@ class DataProvider(object):
 
     def get_ratio(self):
         return self.ratio
+
+    def get_country_sizes(self):
+        return self.country_sizes
 
     def set_sizedCorrection(self,val):
         self.sizedCorrection=val
