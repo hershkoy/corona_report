@@ -72,5 +72,5 @@ sizedCorrection_chkbox.on_change('active',sizedCorrection_click)
 
 curdoc().add_root(stats_plot)
 curdoc().add_root(shifter_slider)
-curdoc().add_root(sizedCorrection_chkbox)
+#curdoc().add_root(sizedCorrection_chkbox)
 curdoc().add_periodic_callback(update_data, cfg.UPDATE_INTERVAL)

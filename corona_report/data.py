@@ -9,7 +9,6 @@ import time
 from string import capwords
 from difflib import get_close_matches
 from bokeh.models import ColumnDataSource
-
 import github
 from config import REPO, TMP_FOLDER, TMP_GIT, DATA
 
