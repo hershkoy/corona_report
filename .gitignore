@@ -1,3 +1,5 @@
 corona_report/__pycache__/
 corona_report/data/agg_data.csv
 __pycache__/
+report/data/agg_data.csv
+notebooks/.ipynb_checkpoints/
