@@ -14,15 +14,17 @@ TMP_GIT = os.path.join(TMP_FOLDER, REPO.split('/')[-1].split('.')[0])
 DATA = os.path.join(TMP_GIT, 'csse_covid_19_data', 'csse_covid_19_daily_reports')
 
 #Github cols
-KEEP_COLS = ['Confirmed', 
-             'Country/Region', 
-             'Deaths', 
-             'Last Update', 
-             'Province/State', 
-             'Recovered']
+KEEP_COLS = ['country',
+             'province', 
+             'confirmed',
+             'deaths',
+             'recovered',
+             'date',
+             'datetime',
+             'file_date']
 
-NUMERIC_COLS = ['Confirmed', 
-                'Deaths', 
-                'Recovered']
+NUMERIC_COLS = ['confirmed', 
+                'deaths', 
+                'recovered']
 
 UPDATE_INTERVAL = 40000
