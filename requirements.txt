@@ -1,5 +1,5 @@
 bokeh==2.0.0
-Jinja2==2.10
+Jinja2==2.11.3
 numpy==1.17.3
 pandas==0.25.3
 requests==2.23.0
